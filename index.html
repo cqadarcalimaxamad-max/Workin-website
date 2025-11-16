@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Link Downloader</title>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="downloader-container">
+        <h2>Soo Dejiye Kasta (Video/Sawir)</h2>
+        <p>Geli link-ga tooska ah (direct link) ee faylka aad rabto inaad soo dejiso:</p>
+        
+        <input type="url" id="linkInput" placeholder="https://... (Geli link-ga tooska ah halkan)">
+        
+        <button id="downloadButton">Soo Deji (Dowlder)</button>
+        
+        <p class="status" id="statusText"></p>
+    </div>
+
+    <script>
+        // Qabashada walxaha (elements)
+        var myButton = document.getElementById("downloadButton");
+        var linkInput = document.getElementById("linkInput");
+        var statusText = document.getElementById("statusText");
+
+        // Ku xir shaqo (function) dhacda marka badhanka la riixo
+        myButton.onclick = function() {
+            
+            // 1. Hel URL-ka uu user-ku geliyay
+            var fileUrl = linkInput.value;
+
+            // 2. MAGACA AAD CODSIISAY
+            // Magaca faylka wuxuu *had iyo jeer* noqon doonaa "Dowldoe.Aish"
+            var fileName = "Dowldoe.Aish";
+
+            // Hubi haddii meeshu bannaan tahay
+            if (!fileUrl) {
+                statusText.textContent = "Fadlan geli link sax ah!";
+                statusText.style.color = "red";
+                return;
+            }
+
+            // U sheeg user-ka in la bilaabay
+            statusText.textContent = "Waa la wadaa... Fadlan sug...";
+            statusText.style.color = "blue";
+            
+            // 3. Isticmaal 'fetch' si aad u hesho xogta faylka
+            fetch(fileUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        // Haddii ay cilad dhacdo (sida 404 ama CORS error)
+                        throw new Error("Lama heli karin faylka. Hubi link-ga ama (CORS error).");
+                    }
+                    return response.blob(); // U beddel xog (binary data)
+                })
+                .then(blob => {
+                    // 4. Abuur URL ku meel gaar ah
+                    var tempUrl = URL.createObjectURL(blob);
+
+                    // 5. Abuur link (<a> tag) qarsoon
+                    var link = document.createElement("a");
+                    link.style.display = "none";
+                    link.href = tempUrl;
+
+                    // 6. QAYBTA MUHIIMKA AH: Ku qasab magaca faylka
+                    link.download = fileName;
+
+                    // 7. Ku dar, riix, oo ka saar link-iga
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(tempUrl);
+                    
+                    // U sheeg user-ka in la dhammeeyay
+                    statusText.textContent = "Waa la soo dejiyay! Ku hubi Gallery-gaaga.";
+                    statusText.style.color = "green";
+                })
+                .catch(err => {
+                    // Haddii ay cilad dhacdo, u sheeg user-ka
+                    console.error("Cilad ayaa dhacday:", err);
+                    statusText.textContent = "Cilad! " + err.message;
+                    statusText.style.color = "red";
+                });
+        };
+    </script>
+
+</body>
+</html>
